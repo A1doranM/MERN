@@ -1,0 +1,5 @@
+{
+  "port": 5000,
+  "mongoURL": "mongodb+srv://Aldoran:1q2w3e3e2w1q4r@cluster1-lxrp3.mongodb.net/app?retryWrites=true&w=majority",
+  "jwrSecret": "maksym MERN"
+}
