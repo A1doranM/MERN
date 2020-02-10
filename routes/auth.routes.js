@@ -14,36 +14,36 @@ router.post(
         check("password", "Password must be longer then 6 symbols").isLength({min: 6}),
     ],
     async (req, res) => {
-    try {
-        const errors = validationResult(req);
+        try {
+            console.log(req.body);
+            const errors = validationResult(req);
 
-        if(!errors.isEmpty()){
-            return res.status(400).json({
-                errors: errors.array(),
-                message: "Wrong data format."
-            })
+            if (!errors.isEmpty()) {
+                return res.status(400).json({
+                    errors: errors.array(),
+                    message: "Wrong data format."
+                })
+            }
+
+            const {email, password} = req.body;
+            const candidate = await User.findOne({email: email});
+
+            if (candidate) {
+                res.status(400).json({message: "User already exists."});
+                return;
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 12);
+            const user = new User({email, password: hashedPassword});
+
+            await user.save();
+            res.status(201).json({message: "User created."});
+        } catch (e) {
+            res.status(500).json({
+                message: "Something wrong on server."
+            });
         }
-
-        const {email, password} = req.body;
-        const cadidate = await User.findOne({email: email});
-
-        if(candidate){
-            res.status(400).json({message: "User already exists."});
-            return;
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 12);
-        const user = new User({email, password: hashedPassword});
-
-        await user.save();
-
-        res.status(201).json({message: "User created."});
-    } catch (e) {
-        res.status(500).json({
-            message: "Something wrong on server."
-        });
-    }
-});
+    });
 
 router.post(
     "/login",
@@ -54,8 +54,8 @@ router.post(
     async (req, res) => {
         try {
             const errors = validationResult(req);
-
-            if(!errors.isEmpty()){
+            
+            if (!errors.isEmpty()) {
                 return res.status(400).json({
                     errors: errors.array(),
                     message: "Wrong data format."
@@ -65,29 +65,28 @@ router.post(
             const {email, password} = req.body;
             const user = await User.findOne({email: email});
 
-            if(!user){
+            if (!user) {
                 res.status(400).json({message: "User does not exists."});
                 return;
             }
 
             const isMatch = await bcrypt.compare(password, user.password);
-
-            if(!isMatch){
+            if (!isMatch) {
                 return res.status(400).json({message: "Wrong email or password"});
             }
 
             const token = jwt.sign(
                 {userId: user.id},
-                config.get("jwtSecret"),
+                config.jwrSecret,
                 {expiresIn: "1h"}
-                );
+            );
 
-            res.status(200).json({token: token, userId: user.id});
+            res.json({token: token, userId: user.id});
         } catch (e) {
             res.status(500).json({
-                message: "Something wrong on server."
+                message: e.message
             });
         }
-});
+    });
 
 module.exports = router;
