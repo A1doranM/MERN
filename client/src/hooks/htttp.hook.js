@@ -1,6 +1,5 @@
 import {useState, useCallback} from "react";
 
-
 export const useHttp = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -26,6 +25,7 @@ export const useHttp = () => {
         } catch (e) {
             setLoading(false);
             setError(e.message);
+            console.log(e.message);
             throw e;
         }
     }, []);

@@ -2,6 +2,7 @@
   <dictionary name="aldor">
     <words>
       <w>bcrypt</w>
+      <w>shortid</w>
     </words>
   </dictionary>
 </component>
